@@ -3,17 +3,21 @@ use substring::Substring;
 
 fn main() {
     let mut board = [
-        ['-'; 3],
-        ['-'; 3],
-        ['-'; 3]
+        [' '; 3],
+        [' '; 3],
+        [' '; 3]
     ];
 
     let mut turn: usize = 0; // 0 for O, 1 for X
     const TURN_CHARS: [char; 2] = ['O', 'X'];
+    
+    println!("RUST TIC-TAC-TOE BY ANDY CHAMBERLAIN\nEnter moves in the form `rc`\nwhere r is the row and c is the column\nMoving to the top right corner would look like `02`");
+
+    print_board(board);
 
     // game loop
     loop {
-        println!("Please input your move.");
+        println!("{}'s turn. Please enter a move.", TURN_CHARS[turn % 2]);
 
         let mut user_move = String::new();
 
@@ -33,20 +37,14 @@ fn main() {
             continue;
         }
         // if move is to an already occupied square
-        if board[move_tuple.0][move_tuple.1] != '-' {
+        if board[move_tuple.0][move_tuple.1] != ' ' {
             println!("Invalid move. That square is already occupied.");
             continue;
         }
 
         board[move_tuple.0][move_tuple.1] = TURN_CHARS[turn % 2];
 
-        println!("Board:");
-        for elem in board {
-            for s in elem{
-                print!("{}", s);
-            }
-            print!("\n");
-        }
+        print_board(board);
 
         if WIN_CHECK_FUNCS[move_tuple.0][move_tuple.1](board) {
             println!("{} wins!", TURN_CHARS[turn % 2]);
@@ -59,6 +57,23 @@ fn main() {
 
         turn += 1;
     }
+}
+
+fn print_board(board: [[char; 3]; 3]){
+    print!("\n");
+    for i in 0..3 {
+        for k in 0..3 {
+            print!(" {} ", board[i][k]);
+            if k < 2 {
+                print!("|");
+            }
+        }
+        print!("\n");
+        if i < 2{
+            println!("---|---|---");
+        }
+    }
+    print!("\n");
 }
 
 fn parse_move(s: String) -> (usize, usize) {
