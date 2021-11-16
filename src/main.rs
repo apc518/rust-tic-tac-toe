@@ -1,15 +1,30 @@
 use std::io;
 use substring::Substring;
 
+#[derive(PartialEq, Eq, Clone, Copy)]
+enum Square {
+    O,
+    X,
+    Empty
+}
+
+fn char_of_square(sq: Square) -> char {
+    match sq {
+        Square::O => 'O',
+        Square::X => 'X',
+        Square::Empty => ' ',
+    }
+}
+
 fn main() {
     let mut board = [
-        [' '; 3],
-        [' '; 3],
-        [' '; 3]
+        [Square::Empty; 3],
+        [Square::Empty; 3],
+        [Square::Empty; 3]
     ];
 
     let mut turn: usize = 0; // 0 for O, 1 for X
-    const TURN_CHARS: [char; 2] = ['O', 'X'];
+    const TURN_CHARS: [Square; 2] = [Square::O, Square::X];
     
     println!("RUST TIC-TAC-TOE BY ANDY CHAMBERLAIN\nEnter moves in the form `rc`\nwhere r is the row and c is the column\nMoving to the top right corner would look like `02`");
 
@@ -17,7 +32,7 @@ fn main() {
 
     // game loop
     loop {
-        println!("{}'s turn. Please enter a move.", TURN_CHARS[turn % 2]);
+        println!("{}'s turn. Please enter a move.", char_of_square(TURN_CHARS[turn % 2]));
 
         let mut user_move = String::new();
 
@@ -37,7 +52,7 @@ fn main() {
             continue;
         }
         // if move is to an already occupied square
-        if board[move_tuple.0][move_tuple.1] != ' ' {
+        if board[move_tuple.0][move_tuple.1] != Square::Empty {
             println!("Invalid move. That square is already occupied.");
             continue;
         }
@@ -47,7 +62,7 @@ fn main() {
         print_board(board);
 
         if WIN_CHECK_FUNCS[move_tuple.0][move_tuple.1](board) {
-            println!("{} wins!", TURN_CHARS[turn % 2]);
+            println!("{} wins!", char_of_square(TURN_CHARS[turn % 2]));
             break;
         }
         else if turn >= 8 {
@@ -59,11 +74,11 @@ fn main() {
     }
 }
 
-fn print_board(board: [[char; 3]; 3]){
+fn print_board(board: [[Square; 3]; 3]){
     print!("\n");
     for i in 0..3 {
         for k in 0..3 {
-            print!(" {} ", board[i][k]);
+            print!(" {} ", char_of_square(board[i][k]));
             if k < 2 {
                 print!("|");
             }
@@ -90,21 +105,21 @@ fn parse_move(s: String) -> (usize, usize) {
     (row, col)
 }
 
-static WIN_CHECK_FUNCS: [[fn([[char;3];3]) -> bool; 3];3] = [
+static WIN_CHECK_FUNCS: [[fn([[Square;3];3]) -> bool; 3];3] = [
     [
-        |board: [[char;3];3]| { 
+        |board: [[Square;3];3]| { 
             board[0][0] == board[1][1] && board[1][1] == board[2][2] // backslash diagonal (\)
             ||
             board[0][0] == board[0][1] && board[0][1] == board[0][2] // top row
             ||
             board[0][0] == board[1][0] && board[1][0] == board[2][0] // left column
         },
-        |board: [[char;3];3]| {
+        |board: [[Square;3];3]| {
             board[0][0] == board[0][1] && board[0][1] == board[0][2] // top row
             ||
             board[0][1] == board[1][1] && board[1][1] == board[2][1] // middle column
         },
-        |board: [[char;3];3]| {
+        |board: [[Square;3];3]| {
             board[0][2] == board[1][1] && board[1][1] == board[2][0] // forward slash diagonal (/)
             ||
             board[0][0] == board[0][1] && board[0][1] == board[0][2] // top row
@@ -113,12 +128,12 @@ static WIN_CHECK_FUNCS: [[fn([[char;3];3]) -> bool; 3];3] = [
         }
     ],
     [
-        |board: [[char;3];3]| {
+        |board: [[Square;3];3]| {
             board[0][0] == board[1][0] && board[1][0] == board[2][0] // left column
             ||
             board[1][0] == board[1][1] && board[1][1] == board[1][2] // middle row
         },
-        |board: [[char;3];3]| {
+        |board: [[Square;3];3]| {
             board[0][2] == board[1][1] && board[1][1] == board[2][0] // forward slash diagonal (/)
             ||
             board[0][0] == board[1][1] && board[1][1] == board[2][2] // backslash diagonal (\)
@@ -127,26 +142,26 @@ static WIN_CHECK_FUNCS: [[fn([[char;3];3]) -> bool; 3];3] = [
             ||
             board[1][0] == board[1][1] && board[1][1] == board[1][2] // middle row
         },
-        |board: [[char;3];3]| {
+        |board: [[Square;3];3]| {
             board[0][2] == board[1][2] && board[1][2] == board[2][2] // right column
             ||
             board[1][0] == board[1][1] && board[1][1] == board[1][2] // middle row
         }
     ],
     [
-        |board: [[char;3];3]| {
+        |board: [[Square;3];3]| {
             board[0][2] == board[1][1] && board[1][1] == board[2][0] // forward slash diagonal (/)
             ||
             board[0][0] == board[1][0] && board[1][0] == board[2][0] // left column
             ||
             board[2][0] == board[2][1] && board[2][1] == board[2][2] // bottom row
         },
-        |board: [[char;3];3]| {
+        |board: [[Square;3];3]| {
             board[0][1] == board[1][1] && board[1][1] == board[2][1] // middle column
             ||
             board[2][0] == board[2][1] && board[2][1] == board[2][2] // bottom row
         },
-        |board: [[char;3];3]| {
+        |board: [[Square;3];3]| {
             board[0][0] == board[1][1] && board[1][1] == board[2][2] // backslash diagonal (\)
             ||
             board[2][0] == board[2][1] && board[2][1] == board[2][2] // bottom row
